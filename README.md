@@ -1,130 +1,181 @@
- 
-# Flask App with MySQL Docker Setup
+# 📦 Docker Project: Two-Tier Flask Application with MySQL (Dockerized on AWS EC2)
 
-This is a simple Flask app that interacts with a MySQL database. The app allows users to submit messages, which are then stored in the database and displayed on the frontend.
+This project demonstrates a production-ready two-tier web application using Flask (Python) as the application layer and MySQL as the database layer, fully containerized with Docker and deployed on an AWS EC2 instance.
 
-## Prerequisites
+## 🌟 Key Features
 
-Before you begin, make sure you have the following installed:
+- **Containerized Architecture**: Flask app and MySQL in separate Docker containers
+- **Docker Networking**: Custom bridge network for secure inter-container communication
+- **Data Persistence**: Docker volumes for MySQL data storage
+- **AWS Deployment**: Ready for cloud deployment on EC2 instances
+- **Environment Variables**: Secure configuration management
+- **Production-Ready**: Follows best practices for containerized applications
 
-- Docker
-- Git (optional, for cloning the repository)
+## 🏗️ Architecture Overview
 
-## Setup
+Frontend (Flask App) <---> MySQL Database
+│ │
+│ │
+▼ ▼
+Docker Container Docker Container
+│ │
+└───────────┬─────────────┘
+│
+▼
+Docker Bridge Network
+│
+▼
+AWS EC2 Instance
 
-1. Clone this repository (if you haven't already):
+##   Getting Started
 
-   ```bash
-   git clone https://github.com/your-username/your-repo-name.git
-   ```
+### Prerequisites
 
-2. Navigate to the project directory:
+- Docker installed on your system
+- AWS account (for EC2 deployment)
+- Basic understanding of Docker and Flask
 
-   ```bash
-   cd your-repo-name
-   ```
+### Project Structure
 
-3. Create a `.env` file in the project directory to store your MySQL environment variables:
+docker-project/
+├── templates/             # Flask templates
+├── .gitignore             # Git ignore rules
+├── app.py                 # Flask application
+├── docker-compose.yml     # Docker compose config
+├── Dockerfile             # Single-stage Dockerfile
+├── Dockerfile-multistage  # Multi-stage Dockerfile
+├── dummy.txt              
+├── Makefile               # Build automation
+├── message.sql            # Database schema
+├── README.md              # This file
+└── requirements.txt       # Python dependencies
 
-   ```bash
-   touch .env
-   ```
+## 🛠️ Installation & Deployment
 
-4. Open the `.env` file and add your MySQL configuration:
-
-   ```
-   MYSQL_HOST=mysql
-   MYSQL_USER=your_username
-   MYSQL_PASSWORD=your_password
-   MYSQL_DB=your_database
-   ```
-
-## Usage
-
-1. Start the containers using Docker Compose:
-
-   ```bash
-   docker-compose up --build
-   ```
-
-2. Access the Flask app in your web browser:
-
-   - Frontend: http://localhost
-   - Backend: http://localhost:5000
-
-3. Create the `messages` table in your MySQL database:
-
-   - Use a MySQL client or tool (e.g., phpMyAdmin) to execute the following SQL commands:
-   
-     ```sql
-     CREATE TABLE messages (
-         id INT AUTO_INCREMENT PRIMARY KEY,
-         message TEXT
-     );
-     ```
-
-4. Interact with the app:
-
-   - Visit http://localhost to see the frontend. You can submit new messages using the form.
-   - Visit http://localhost:5000/insert_sql to insert a message directly into the `messages` table via an SQL query.
-
-## Cleaning Up
-
-To stop and remove the Docker containers, press `Ctrl+C` in the terminal where the containers are running, or use the following command:
+### 1. Local Development Setup
 
 ```bash
-docker-compose down
+# Clone the repository
+git clone <your-repo-url>
+cd two-tier-flask-app
+
+# Create custom Docker network
+docker network create docker-project -d bridge
+
+# Start MySQL container with persistent volume
+docker run -d --name mysql --network docker-project \
+  -e MYSQL_ROOT_PASSWORD=root \
+  -e MYSQL_DATABASE=devops \
+  -v mysql-data:/var/lib/mysql \
+  mysql:latest
+
+# Build Flask application image
+docker build -t docker-project:latest .
+
+# Run Flask container connected to MySQL
+docker run -d -p 5000:5000 --network docker-project \
+  -e MYSQL_HOST=mysql \
+  -e MYSQL_USER=root \
+  -e MYSQL_PASSWORD=root \
+  -e MYSQL_DB=devops \
+  docker-project:latest
 ```
 
-## To run this two-tier application using  without docker-compose
+### 2. AWS EC2 Deployment
 
-- First create a docker image from Dockerfile
+1. **Launch EC2 Instance**:
+   - AMI: Ubuntu 24.04 LTS
+   - Instance Type: t2.micro or larger
+   - Security Group: Allow ports 22 (SSH) and 5000 (Flask)
+
+2. **Connect to EC2 Instance**:
 ```bash
-docker build -t flaskapp .
+chmod 400 your-key.pem
+ssh -i "your-key.pem" ubuntu@<EC2-Public-IP>
 ```
 
-- Now, make sure that you have created a network using following command
+3. **Install Docker**:
 ```bash
-docker network create twotier
+sudo apt update
+sudo apt install -y docker.io
+sudo systemctl start docker
+sudo systemctl enable docker
 ```
 
-- Attach both the containers in the same network, so that they can communicate with each other
+4. **Deploy Application**:
+   - Follow the same steps as local development setup
 
-i) MySQL container 
+## 🔍 Verifying the Deployment
+
+### Check Running Containers
 ```bash
-docker run -d \
-    --name mysql \
-    -v mysql-data:/var/lib/mysql \
-    --network=twotier \
-    -e MYSQL_DATABASE=mydb \
-    -e MYSQL_ROOT_PASSWORD=admin \
-    -p 3306:3306 \
-    mysql:5.7
-
+docker ps
 ```
-ii) Backend container
+
+### Verify Database Content
 ```bash
-docker run -d \
-    --name flaskapp \
-    --network=twotier \
-    -e MYSQL_HOST=mysql \
-    -e MYSQL_USER=root \
-    -e MYSQL_PASSWORD=admin \
-    -e MYSQL_DB=mydb \
-    -p 5000:5000 \
-    flaskapp:latest
-
+docker exec -it mysql bash
+mysql -u root -p
+```
+```sql
+USE devops;
+SELECT * FROM messages;
 ```
 
-## Notes
-
-- Make sure to replace placeholders (e.g., `your_username`, `your_password`, `your_database`) with your actual MySQL configuration.
-
-- This is a basic setup for demonstration purposes. In a production environment, you should follow best practices for security and performance.
-
-- Be cautious when executing SQL queries directly. Validate and sanitize user inputs to prevent vulnerabilities like SQL injection.
-
-- If you encounter issues, check Docker logs and error messages for troubleshooting.
-
+Expected Output:
+```
++----+---------+
+| id | message |
++----+---------+
+| 1  | Hello   |
+| 2  | I       |
+| 3  | am      |
+| 4  | Pranay  |
++----+---------+
 ```
 
+## 🌐 Accessing the Application
+
+Once deployed, access the Flask application at:
+```
+http://<EC2-Public-IP>:5000
+```
+
+## 🔧 Configuration Options
+
+| Environment Variable | Description                          | Default Value |
+|-----------------------|--------------------------------------|---------------|
+| MYSQL_HOST            | MySQL container hostname             | mysql         |
+| MYSQL_USER            | MySQL username                       | root          |
+| MYSQL_PASSWORD        | MySQL password                       | root          |
+| MYSQL_DB              | MySQL database name                  | devops        |
+
+## 🛡️ Security Considerations
+
+1. **Never use root credentials in production**
+2. **Implement proper firewall rules** on EC2
+3. **Use SSL/TLS** for all connections
+4. **Regularly update** Docker images and packages
+
+## 📚 Technical Details
+
+### Docker Networking
+- Custom bridge network `docker-project` isolates the application containers
+- Containers communicate using internal DNS (mysql hostname)
+
+### Data Persistence
+- MySQL data is stored in a Docker volume (`mysql-data`)
+- Volume persists between container restarts
+
+### Multi-stage Building
+- The project includes both single-stage and multi-stage Dockerfiles
+- Multi-stage builds reduce final image size
+
+## 🤝 Contributing
+
+Contributions are welcome! Please fork the repository and submit a pull request.
+
+## 📞 Contact
+
+Maintained by Pranay  
+For support or questions, please open an issue in the repository.
