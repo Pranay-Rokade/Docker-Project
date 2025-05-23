@@ -22,22 +22,21 @@ This project demonstrates a production-ready two-tier web application using Flas
 - AWS account (for EC2 deployment)
 - Basic understanding of Docker and Flask
 
-### Project Structure
-
+## Project Structure
+```md
 docker-project/
-├── templates/             # Flask templates
-├── .gitignore             # Git ignore rules
-├── app.py                 # Flask application
-├── docker-compose.yml     # Docker compose config
-├── Dockerfile             # Single-stage Dockerfile
-├── Dockerfile-multistage  # Multi-stage Dockerfile
-├── dummy.txt              
-├── Makefile               # Build automation
-├── message.sql            # Database schema
-├── README.md              # This file
-└── requirements.txt       # Python dependencies
-
-## 🛠️ Installation & Deployment
+├── templates/ # Flask templates
+├── .gitignore # Git ignore rules
+├── app.py # Flask application
+├── docker-compose.yml # Docker compose config
+├── Dockerfile # Single-stage Dockerfile
+├── Dockerfile-multistage # Multi-stage Dockerfile
+├── dummy.txt # Placeholder file
+├── Makefile # Build automation
+├── message.sql # Database schema
+├── README.md # Documentation
+└── requirements.txt # Python dependencies
+```
 
 ### 1. Local Development Setup
 
