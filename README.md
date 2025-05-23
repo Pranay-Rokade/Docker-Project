@@ -13,19 +13,7 @@ This project demonstrates a production-ready two-tier web application using Flas
 
 ## 🏗️ Architecture Overview
 
-Frontend (Flask App) <---> MySQL Database
-│ │
-│ │
-▼ ▼
-Docker Container Docker Container
-│ │
-└───────────┬─────────────┘
-│
-▼
-Docker Bridge Network
-│
-▼
-AWS EC2 Instance
+<pre> ## 🗂️ Architecture Diagram +------------------------+ | Frontend (Flask App) | +-----------+------------+ | | Connects via internal network | +-----------v------------+ | MySQL Database | +-----------+------------+ | | Containerized via Docker | +------------------------+------------------------+ | Docker Containers | +------------------------+------------------------+ | | Interact via | Docker Bridge Network | +-----------v------------+ | docker-project network | +-----------+------------+ | | Hosted on | +-----------v------------+ | AWS EC2 Instance | | (Ubuntu 24.04) | +------------------------+ </pre>
 
 ##   Getting Started
 
