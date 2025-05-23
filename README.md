@@ -12,8 +12,7 @@ This project demonstrates a production-ready two-tier web application using Flas
 - **Production-Ready**: Follows best practices for containerized applications
 
 ## 🏗️ Architecture Overview
-
-<pre> ## 🗂️ Architecture Diagram +------------------------+ | Frontend (Flask App) | +-----------+------------+ | | Connects via internal network | +-----------v------------+ | MySQL Database | +-----------+------------+ | | Containerized via Docker | +------------------------+------------------------+ | Docker Containers | +------------------------+------------------------+ | | Interact via | Docker Bridge Network | +-----------v------------+ | docker-project network | +-----------+------------+ | | Hosted on | +-----------v------------+ | AWS EC2 Instance | | (Ubuntu 24.04) | +------------------------+ </pre>
+![Architecture Diagram](Architecture.png)
 
 ##   Getting Started
 
